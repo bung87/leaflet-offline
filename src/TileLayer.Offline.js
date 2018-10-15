@@ -169,8 +169,8 @@
             var key = null;
 
             if (url.indexOf('{s}')) {
-                var regexstring = new RegExp('[' + this.options.subdomains.join('|') + ']\.');
-                key = url.replace(regexstring, this.options.subdomains['0'] + '.');
+                var regexstring = new RegExp('/(' + this.options.subdomains.join('|') + ')\.');
+                key = url.replace(regexstring,'/' + this.options.subdomains['0'] + '.');
             }
 
             return key || url;
