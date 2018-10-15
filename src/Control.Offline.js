@@ -132,7 +132,7 @@
             };
 
             if (this.options.confirmSavingCallback) {
-                this.options.confirmSavingCallback(tileUrls.length, continueSaveTiles);
+                this.options.confirmSavingCallback.call(this,tileUrls.length, continueSaveTiles);
             } else {
                 continueSaveTiles();
             }
