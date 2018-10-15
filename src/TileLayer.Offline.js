@@ -104,12 +104,14 @@
         getTileUrl: function (coords) {
             var url = L.TileLayer.prototype.getTileUrl.call(this, coords);
             var dbStorageKey = this._getStorageKey(url);
-
+            
             var resultPromise = this._tilesDb.getItem(dbStorageKey).then(function (data) {
                 if (data && typeof data === 'object') {
                     return URL.createObjectURL(data);
                 }
                 return url;
+            },function(reason){
+                return url
             }).catch(function (err) {
                 throw err;
             });
