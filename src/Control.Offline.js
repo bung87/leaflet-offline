@@ -104,7 +104,7 @@
 
             if (currentZoom < this.options.minZoom) {
                 self._baseLayer.fire('offline:below-min-zoom-error');
-
+                console.error('offline:below-min-zoom-error');
                 return;
             }
 
