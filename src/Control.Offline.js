@@ -108,17 +108,16 @@
                 return;
             }
 
-            for (var zoom = currentZoom; zoom <= this.options.maxZoom; zoom++) {
-                zoomLevels.push(zoom);
-            }
-
-            for (var i = 0; i < zoomLevels.length; i++) {
-                bounds = L.bounds(this._map.project(latlngBounds.getNorthWest(), zoomLevels[i]),
-                    this._map.project(latlngBounds.getSouthEast(), zoomLevels[i]));
-                tileUrls = tileUrls.concat(this._baseLayer.getTileUrls(bounds, zoomLevels[i]));
-            }
-
             var continueSaveTiles = function () {
+                for (var zoom = currentZoom; zoom <= self.options.maxZoom; zoom++) {
+                    zoomLevels.push(zoom);
+                }
+
+                for (var i = 0; i < zoomLevels.length; i++) {
+                    bounds = L.bounds(self._map.project(latlngBounds.getNorthWest(), zoomLevels[i]),
+                        self._map.project(latlngBounds.getSouthEast(), zoomLevels[i]));
+                    tileUrls = tileUrls.concat(self._baseLayer.getTileUrls(bounds, zoomLevels[i]));
+                }
                 self._baseLayer.fire('offline:save-start', {
                     nTilesToSave: tileUrls.length
                 });
