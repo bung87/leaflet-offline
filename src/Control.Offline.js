@@ -108,7 +108,7 @@
             }
 
             var continueSaveTiles = function () {
-                for (var zoom = this.options.minZoom; zoom <= self.options.maxZoom; zoom++) {
+                for (var zoom = self.options.minZoom; zoom <= self.options.maxZoom; zoom++) {
                     zoomLevels.push(zoom);
                 }
 
