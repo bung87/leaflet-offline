@@ -99,17 +99,16 @@
             var bounds = null;
             var zoomLevels = [];
             var tileUrls = [];
-            var currentZoom = this._map.getZoom();
             var latlngBounds = this._map.getBounds();
 
-            if (currentZoom < this.options.minZoom) {
+            if ( this.options.minZoom < this._baseLayer.options.minZoom) {
                 self._baseLayer.fire('offline:below-min-zoom-error');
-                console.error('offline:below-min-zoom-error');
+                console.error('Can not save tiles below base layer minimum zoom level.');
                 return;
             }
 
             var continueSaveTiles = function () {
-                for (var zoom = currentZoom; zoom <= self.options.maxZoom; zoom++) {
+                for (var zoom = this.options.minZoom; zoom <= self.options.maxZoom; zoom++) {
                     zoomLevels.push(zoom);
                 }
 
