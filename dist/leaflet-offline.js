@@ -104,12 +104,14 @@
         getTileUrl: function (coords) {
             var url = L.TileLayer.prototype.getTileUrl.call(this, coords);
             var dbStorageKey = this._getStorageKey(url);
-
+            
             var resultPromise = this._tilesDb.getItem(dbStorageKey).then(function (data) {
                 if (data && typeof data === 'object') {
                     return URL.createObjectURL(data);
                 }
                 return url;
+            },function(reason){
+                return url
             }).catch(function (err) {
                 throw err;
             });
@@ -169,8 +171,8 @@
             var key = null;
 
             if (url.indexOf('{s}')) {
-                var regexstring = new RegExp('[' + this.options.subdomains.join('|') + ']\.');
-                key = url.replace(regexstring, this.options.subdomains['0'] + '.');
+                var regexstring = new RegExp('/(' + this.options.subdomains.join('|') + ')\.');
+                key = url.replace(regexstring,'/' + this.options.subdomains['0'] + '.');
             }
 
             return key || url;
@@ -252,6 +254,7 @@
             var container = L.DomUtil.create('div', 'leaflet-control-offline leaflet-bar');
 
             this._createButton(this.options.saveButtonHtml, this.options.saveButtonTitle, 'save-tiles-button', container, this._saveTiles);
+            if(this.options.removeButtonHtml && this.options.removeButtonTitle)
             this._createButton(this.options.removeButtonHtml, this.options.removeButtonTitle, 'remove-tiles-button', container, this._removeTiles);
 
             return container;
@@ -293,26 +296,24 @@
             var bounds = null;
             var zoomLevels = [];
             var tileUrls = [];
-            var currentZoom = this._map.getZoom();
             var latlngBounds = this._map.getBounds();
 
-            if (currentZoom < this.options.minZoom) {
+            if ( this.options.minZoom < this._baseLayer.options.minZoom) {
                 self._baseLayer.fire('offline:below-min-zoom-error');
-
+                console.error('Can not save tiles below base layer minimum zoom level.');
                 return;
             }
 
-            for (var zoom = currentZoom; zoom <= this.options.maxZoom; zoom++) {
-                zoomLevels.push(zoom);
-            }
-
-            for (var i = 0; i < zoomLevels.length; i++) {
-                bounds = L.bounds(this._map.project(latlngBounds.getNorthWest(), zoomLevels[i]),
-                    this._map.project(latlngBounds.getSouthEast(), zoomLevels[i]));
-                tileUrls = tileUrls.concat(this._baseLayer.getTileUrls(bounds, zoomLevels[i]));
-            }
-
             var continueSaveTiles = function () {
+                for (var zoom = self.options.minZoom; zoom <= self.options.maxZoom; zoom++) {
+                    zoomLevels.push(zoom);
+                }
+
+                for (var i = 0; i < zoomLevels.length; i++) {
+                    bounds = L.bounds(self._map.project(latlngBounds.getNorthWest(), zoomLevels[i]),
+                        self._map.project(latlngBounds.getSouthEast(), zoomLevels[i]));
+                    tileUrls = tileUrls.concat(self._baseLayer.getTileUrls(bounds, zoomLevels[i]));
+                }
                 self._baseLayer.fire('offline:save-start', {
                     nTilesToSave: tileUrls.length
                 });
@@ -327,7 +328,7 @@
             };
 
             if (this.options.confirmSavingCallback) {
-                this.options.confirmSavingCallback(tileUrls.length, continueSaveTiles);
+                this.options.confirmSavingCallback.call(this,tileUrls.length, continueSaveTiles);
             } else {
                 continueSaveTiles();
             }
